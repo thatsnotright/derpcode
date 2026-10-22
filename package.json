@@ -1,0 +1,13 @@
+{
+  "name": "interview-practice",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "concurrently -k -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
+    "dev:server": "tsx watch server/index.ts",
+    "dev:web": "vite --config web/vite.config.ts",
+    "build": "tsc -p web/tsconfig.json --noEmit && vite build --config web/vite.config.ts",
+    "start": "npm run build && NODE_ENV=production tsx server/index.ts",
+    "verify": "tsx scripts/verify.ts"
+  }
+}

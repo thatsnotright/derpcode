@@ -1,0 +1,1 @@
+{"title": "In-Memory File System", "difficulty": "hard", "minutes": 30, "language": "go", "readonly": ["solution_test.go"], "order": 5}

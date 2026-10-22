@@ -1,0 +1,143 @@
+:root {
+  color-scheme: light dark;
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  line-height: 1.45;
+  --accent: #2563eb;
+  --border: #c2c8d1;
+  --muted: #5b6472;
+  --surface: color-mix(in srgb, CanvasText 5%, Canvas);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+}
+
+.app {
+  max-width: 760px;
+  margin: 0 auto;
+  padding: 1.5rem 1rem 3rem;
+}
+
+h1 {
+  margin-top: 0;
+  font-size: 1.6rem;
+}
+
+button,
+input,
+select {
+  font: inherit;
+}
+
+button {
+  padding: 0.3rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: Canvas;
+  color: CanvasText;
+  cursor: pointer;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+input[type="text"],
+input[type="number"],
+select {
+  padding: 0.3rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: Canvas;
+  color: CanvasText;
+}
+
+:focus-visible {
+  outline: 3px solid var(--accent);
+  outline-offset: 2px;
+}
+
+ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.toolbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.tree ul[role="group"] {
+  margin-left: 1.25rem;
+  border-left: 1px dashed var(--border);
+}
+
+.tree-li {
+  outline: none;
+}
+
+.tree-row {
+  display: flex;
+  gap: 0.4rem;
+  align-items: center;
+  padding: 0.15rem 0.4rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.tree-row:hover {
+  background: var(--surface);
+}
+
+.tree-row.selected {
+  background: color-mix(in srgb, var(--accent) 18%, Canvas);
+}
+
+/* The li holds focus, so show the ring on its row. */
+.tree-li:focus-visible > .tree-row {
+  outline: 3px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.twisty {
+  display: inline-block;
+  width: 1rem;
+  text-align: center;
+  font-family: ui-monospace, monospace;
+}
+
+.kind {
+  font-size: 0.7rem;
+  color: var(--muted);
+  font-family: ui-monospace, monospace;
+}
+
+.hint {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
