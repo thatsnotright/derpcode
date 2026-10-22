@@ -47,6 +47,7 @@ func (f *fakeInventory) reservedQty(sku string) int {
 }
 
 type fakePayments struct {
+	mu          sync.Mutex
 	err         error
 	amountCents int64
 	calls       int
@@ -56,6 +57,8 @@ func (f *fakePayments) Charge(ctx context.Context, _ string, amountCents int64) 
 	if err := ctx.Err(); err != nil {
 		return err
 	}
+	f.mu.Lock()
+	defer f.mu.Unlock()
 	f.calls++
 	f.amountCents = amountCents
 	return f.err

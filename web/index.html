@@ -1,0 +1,59 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Interview Practice</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <strong class="brand">Interview Practice <span class="muted">(local)</span></strong>
+      <span id="problem-title" class="problem-name"></span>
+      <div class="actions">
+        <button id="btn-run" class="primary" title="⌘/Ctrl+Enter">▶ Run tests</button>
+        <button id="btn-format" title="gofmt (⌘/Ctrl+S)">Format</button>
+        <button id="btn-reset">Reset</button>
+        <span class="divider"></span>
+        <div class="timer-group" role="group" aria-label="Interview timer">
+          <span id="timer" class="timer" aria-live="off">00:00</span>
+          <select id="timer-minutes" aria-label="Timer length">
+            <option value="15">15m</option>
+            <option value="30">30m</option>
+            <option value="45">45m</option>
+            <option value="60">60m</option>
+          </select>
+          <button id="timer-toggle">Start</button>
+          <button id="timer-reset">Reset</button>
+        </div>
+        <span class="divider"></span>
+        <button id="btn-notes" aria-expanded="false" aria-controls="notes">Notes</button>
+        <button id="btn-reveal">Reveal solution</button>
+      </div>
+    </header>
+
+    <main id="main">
+      <aside class="left">
+        <nav id="problem-list" aria-label="Problems"></nav>
+        <article id="readme" class="markdown" aria-label="Problem description"></article>
+      </aside>
+      <div class="splitter" data-side="left" role="separator" aria-orientation="vertical" aria-label="Resize sidebar"></div>
+      <section class="center">
+        <div id="tabs" class="tabs" role="tablist" aria-label="Files"></div>
+        <div id="editor" class="editor-host"></div>
+        <div id="notes" class="notes" hidden>
+          <label for="notes-text" class="panel-title">Notes (saved per problem — talking points, questions to ask, review comments)</label>
+          <textarea id="notes-text" spellcheck="true"></textarea>
+        </div>
+      </section>
+      <div class="splitter" data-side="right" role="separator" aria-orientation="vertical" aria-label="Resize results panel"></div>
+      <section id="right" class="right"></section>
+    </main>
+
+    <div id="react-hint" class="hint" hidden>
+      React preview is off: run <code>npm install</code> in the project folder, then restart <code>npm start</code>.
+    </div>
+
+    <script type="module" src="/js/app.js"></script>
+  </body>
+</html>

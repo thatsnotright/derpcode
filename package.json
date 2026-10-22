@@ -2,12 +2,18 @@
   "name": "interview-practice",
   "private": true,
   "type": "module",
+  "description": "Local, offline CoderPad-style practice for Go and React interview rounds.",
+  "engines": {
+    "node": ">=23.6"
+  },
   "scripts": {
-    "dev": "concurrently -k -n server,web -c blue,green \"npm:dev:server\" \"npm:dev:web\"",
-    "dev:server": "tsx watch server/index.ts",
-    "dev:web": "vite --config web/vite.config.ts",
-    "build": "tsc -p web/tsconfig.json --noEmit && vite build --config web/vite.config.ts",
-    "start": "npm run build && NODE_ENV=production tsx server/index.ts",
-    "verify": "tsx scripts/verify.ts"
+    "start": "node server/index.ts",
+    "dev": "node --watch-path=server server/index.ts",
+    "verify": "node scripts/verify.ts"
+  },
+  "optionalDependencies": {
+    "esbuild": "^0.25.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
   }
 }
