@@ -14,18 +14,7 @@
         <button id="btn-run" class="primary" title="⌘/Ctrl+Enter">▶ Run tests</button>
         <button id="btn-format" title="gofmt (⌘/Ctrl+S)">Format</button>
         <button id="btn-reset">Reset</button>
-        <span class="divider"></span>
-        <div class="timer-group" role="group" aria-label="Interview timer">
-          <span id="timer" class="timer" aria-live="off">00:00</span>
-          <select id="timer-minutes" aria-label="Timer length">
-            <option value="15">15m</option>
-            <option value="30">30m</option>
-            <option value="45">45m</option>
-            <option value="60">60m</option>
-          </select>
-          <button id="timer-toggle">Start</button>
-          <button id="timer-reset">Reset</button>
-        </div>
+        <span id="save-status" class="muted save-status" aria-live="polite"></span>
         <span class="divider"></span>
         <button id="btn-notes" aria-expanded="false" aria-controls="notes">Notes</button>
         <button id="btn-reveal">Reveal solution</button>

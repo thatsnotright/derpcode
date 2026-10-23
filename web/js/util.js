@@ -48,12 +48,27 @@ export function remove(key) {
   }
 }
 
+/** Debounced fn with .flush() (run now if pending) and .cancel(). */
 export function debounce(fn, ms) {
-  let t;
-  return (...args) => {
+  let t = 0;
+  let pending = null;
+  const debounced = (...args) => {
     clearTimeout(t);
-    t = setTimeout(() => fn(...args), ms);
+    pending = args;
+    t = setTimeout(debounced.flush, ms);
   };
+  debounced.flush = () => {
+    clearTimeout(t);
+    if (!pending) return;
+    const args = pending;
+    pending = null;
+    fn(...args);
+  };
+  debounced.cancel = () => {
+    clearTimeout(t);
+    pending = null;
+  };
+  return debounced;
 }
 
 async function request(url, body) {

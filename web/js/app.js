@@ -9,7 +9,10 @@ const state = {
   problem: null, // { id, language, minutes, readme, files: [{name, content, readonly}] }
   files: [], // working copy
   active: 0,
+  cursors: {}, // file name -> editor position, saved with the draft
+  savedAt: null,
   panel: null,
+  reactAvailable: false,
 };
 
 // ---------- Problem list ----------
@@ -28,6 +31,7 @@ async function loadProblemList() {
             "button.problem-item",
             { "data-id": p.id, onClick: () => selectProblem(p.id) },
             h("span.problem-title", { text: p.title }),
+            h("span.started", { text: "●", title: "In progress (saved)", hidden: !load(draftKey(p.id), null) }),
             h("span.badge", { className: `diff-${p.difficulty}`, text: p.difficulty }),
           ),
         ),
@@ -42,11 +46,14 @@ async function loadProblemList() {
 const draftKey = (id) => `draft:${id}`;
 
 async function selectProblem(id) {
+  flushDraft(); // save the problem we're leaving before state changes
   const problem = await api.problem(id);
   state.problem = problem;
   const draft = load(draftKey(id), null);
   state.files = problem.files.map((f) => ({ ...f, content: draft?.files?.[f.name] ?? f.content }));
-  state.active = Math.min(draft?.active ?? 0, state.files.length - 1);
+  state.active = Math.max(0, Math.min(draft?.active ?? 0, state.files.length - 1));
+  state.cursors = draft?.cursors ?? {};
+  state.savedAt = draft?.savedAt ?? null;
   save("last", id);
   location.hash = id;
 
@@ -57,20 +64,51 @@ async function selectProblem(id) {
   renderTabs();
   showActiveFile();
   setupPanel();
-  timer.reset(problem.minutes);
+  renderSaveStatus();
   $("#notes-text").value = load(`notes:${id}`, "");
   $("#btn-format").hidden = problem.language !== "go";
   $("#react-hint").hidden = problem.language !== "react" || state.reactAvailable;
   $("#btn-run").textContent = problem.language === "go" ? "▶ Run tests" : "↻ Refresh preview";
 }
 
-const persist = debounce(() => {
+// Drafts: only files that differ from the starter are meaningful, but we store
+// all of them so a problem's starter can change without clobbering work.
+function saveDraft() {
   if (!state.problem) return;
-  save(draftKey(state.problem.id), {
+  const id = state.problem.id;
+  const edited = state.files.some((f, i) => f.content !== state.problem.files[i].content);
+  rememberCursor();
+  if (!edited && !load(draftKey(id), null)) return; // untouched: don't mark as started
+  state.savedAt = Date.now();
+  save(draftKey(id), {
     active: state.active,
+    cursors: state.cursors,
+    savedAt: state.savedAt,
     files: Object.fromEntries(state.files.map((f) => [f.name, f.content])),
   });
-}, 300);
+  document.querySelector(`.problem-item[data-id="${id}"] .started`)?.removeAttribute("hidden");
+  renderSaveStatus();
+}
+
+const persist = debounce(saveDraft, 300);
+
+/** Save now, including cursor moves that didn't trigger an edit. */
+function flushDraft() {
+  persist.cancel();
+  saveDraft();
+}
+
+function rememberCursor() {
+  const f = state.files[state.active];
+  if (f) state.cursors[f.name] = editor.position();
+}
+
+function renderSaveStatus() {
+  const t = state.savedAt;
+  $("#save-status").textContent = t
+    ? `Saved ${new Date(t).toLocaleTimeString([], { hour: "numeric", minute: "2-digit" })}`
+    : "";
+}
 
 function renderReadme() {
   const el = $("#readme");
@@ -99,6 +137,7 @@ function renderTabs() {
           "aria-selected": String(i === state.active),
           title: f.readonly ? "Read-only (provided by the interviewer)" : f.name,
           onClick: () => {
+            rememberCursor();
             state.active = i;
             renderTabs();
             showActiveFile();
@@ -115,7 +154,10 @@ function renderTabs() {
 function showActiveFile() {
   const f = state.files[state.active];
   editor.setFile(f.name, f.content, f.readonly);
+  if (state.cursors[f.name]) editor.restorePosition(state.cursors[f.name]);
 }
+
+const runKey = (id) => `run:${id}`;
 
 function setupPanel() {
   state.panel?.destroy?.();
@@ -123,6 +165,10 @@ function setupPanel() {
   host.replaceChildren();
   state.panel = state.problem.language === "go" ? new GoPanel(host) : new ReactPanel(host);
   if (state.problem.language === "react") state.panel.update(state.files);
+  else {
+    const last = load(runKey(state.problem.id), null);
+    if (last) state.panel.show(last, true);
+  }
 }
 
 const refreshPreview = debounce(() => state.panel instanceof ReactPanel && state.panel.update(state.files), 600);
@@ -137,8 +183,11 @@ async function run() {
   running = true;
   $("#btn-run").disabled = true;
   state.panel.running();
+  const id = state.problem.id;
   try {
-    state.panel.show(await api.goRun(state.files));
+    const result = await api.goRun(state.files);
+    save(runKey(id), { ...result, raw: result.raw.slice(0, 20000) });
+    if (state.problem.id === id) state.panel.show(result);
   } catch (err) {
     state.panel.error(err);
   } finally {
@@ -157,8 +206,13 @@ async function format() {
 
 function reset() {
   if (!state.problem || !confirm("Reset all files to the starter code? Your edits will be lost.")) return;
-  remove(draftKey(state.problem.id));
-  selectProblem(state.problem.id);
+  const id = state.problem.id;
+  persist.cancel();
+  remove(draftKey(id));
+  remove(runKey(id));
+  state.problem = null; // so selectProblem's flush doesn't re-save the old draft
+  document.querySelector(`.problem-item[data-id="${id}"] .started`)?.setAttribute("hidden", "");
+  selectProblem(id);
 }
 
 async function reveal() {
@@ -166,44 +220,6 @@ async function reveal() {
   if (!confirm("Reveal the reference solution? Try to finish first — in the interview you won't have one.")) return;
   openReveal(await api.reveal(state.problem.id), state.files);
 }
-
-// ---------- Timer ----------
-
-const timer = {
-  total: 0,
-  remaining: 0,
-  endsAt: 0,
-  handle: 0,
-  reset(minutes) {
-    this.stop();
-    this.total = minutes * 60;
-    this.remaining = this.total;
-    $("#timer-minutes").value = String(minutes);
-    this.render();
-  },
-  start() {
-    this.endsAt = Date.now() + this.remaining * 1000;
-    this.handle = setInterval(() => {
-      this.remaining = Math.round((this.endsAt - Date.now()) / 1000);
-      this.render();
-    }, 250);
-    $("#timer-toggle").textContent = "Pause";
-  },
-  stop() {
-    clearInterval(this.handle);
-    this.handle = 0;
-    $("#timer-toggle").textContent = "Start";
-  },
-  toggle() {
-    this.handle ? this.stop() : this.start();
-  },
-  render() {
-    const r = this.remaining;
-    const abs = Math.abs(r);
-    $("#timer").textContent = `${r < 0 ? "-" : ""}${String(Math.floor(abs / 60)).padStart(2, "0")}:${String(abs % 60).padStart(2, "0")}`;
-    $("#timer").className = "timer" + (r <= 0 ? " red" : r <= 300 ? " amber" : "");
-  },
-};
 
 // ---------- Resizable columns ----------
 
@@ -254,9 +270,9 @@ $("#btn-run").addEventListener("click", run);
 $("#btn-format").addEventListener("click", format);
 $("#btn-reset").addEventListener("click", reset);
 $("#btn-reveal").addEventListener("click", reveal);
-$("#timer-toggle").addEventListener("click", () => timer.toggle());
-$("#timer-reset").addEventListener("click", () => timer.reset(Number($("#timer-minutes").value)));
-$("#timer-minutes").addEventListener("change", (e) => timer.reset(Number(e.target.value)));
+// Flush pending edits when the tab is hidden or reloaded so nothing typed is lost.
+window.addEventListener("pagehide", flushDraft);
+document.addEventListener("visibilitychange", () => document.hidden && flushDraft());
 $("#btn-notes").addEventListener("click", () => {
   const notes = $("#notes");
   notes.hidden = !notes.hidden;

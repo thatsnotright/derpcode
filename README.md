@@ -29,12 +29,13 @@ npm install          # esbuild, react, react-dom (one-time; needs network)
   results; React problems re-bundle and reload the preview (it also refreshes as you type).
 - **Format** (`⌘/Ctrl+S`): `gofmt` the current Go file.
 - **Go docs (offline)**: `go doc strings.Builder` etc. — the interview allows looking up syntax.
-- **Timer**: defaults to the problem's length (30 min for each Go part, 60 for React); amber at 5 min.
 - **Notes**: per-problem scratchpad — useful for review comments / coaching points in the PR round.
 - **Reveal solution**: reference implementation, a diff against your code, and (for Go PRs) the
   reviewer notes listing every planted bug and the best-practice talking points.
-- README checklists (React accessibility criteria) are clickable. Drafts, notes and checks are saved in
-  the browser's localStorage; **Reset** restores the starter files.
+- **Resume anytime**: your attempt at every problem autosaves to the browser's localStorage as you
+  type (and on reload / tab close) — files, active tab, cursor/scroll position, last Go test run,
+  notes and README checklist ticks. The last problem you had open reopens on reload, and problems
+  you've started show a ● in the list. **Reset** restores the starter files for that problem.
 
 ## Adding problems
 

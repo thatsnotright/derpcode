@@ -55,10 +55,8 @@ button.primary { background: var(--accent); border-color: var(--accent); color: 
 .problem-name { font-weight: 600; color: var(--accent); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .actions { display: flex; align-items: center; gap: 8px; margin-left: auto; flex-wrap: wrap; }
 .divider { width: 1px; height: 22px; background: var(--border); }
-.timer-group { display: flex; align-items: center; gap: 6px; }
-.timer { font: 600 18px var(--mono); min-width: 74px; text-align: right; }
-.timer.amber { color: var(--amber); }
-.timer.red { color: var(--red); }
+.save-status { font-size: 12px; min-width: 110px; text-align: right; }
+.problem-item .started { color: var(--accent); font-size: 10px; margin-right: auto; margin-left: -2px; }
 
 /* ---------- layout ---------- */
 #main {

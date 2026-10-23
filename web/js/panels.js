@@ -46,7 +46,7 @@ export class GoPanel {
     this.results.replaceChildren(h("pre.output.err", { text: String(err) }));
   }
 
-  show(r) {
+  show(r, restored = false) {
     const passed = r.tests.filter((t) => t.status === "pass" && !t.name.includes("/")).length;
     const failed = r.tests.filter((t) => t.status === "fail" && !t.name.includes("/")).length;
     const nodes = [
@@ -60,6 +60,7 @@ export class GoPanel {
         r.timedOut && h("span.badge.badge-red", { text: "timed out" }),
         !r.vet.ok && h("span.badge.badge-amber", { text: "vet" }),
         !r.gofmt.ok && h("span.badge.badge-amber", { text: "gofmt" }),
+        restored && h("span.muted", { text: "(last run, before reload)" }),
       ),
     ];
     if (!r.build.ok) nodes.push(h("h4", { text: "Build errors" }), h("pre.output.err", { text: r.build.output }));

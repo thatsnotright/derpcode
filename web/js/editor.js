@@ -59,6 +59,19 @@ export class CodeEditor {
     this.ta.focus();
   }
 
+  /** Cursor + scroll, so a draft can resume exactly where it was left. */
+  position() {
+    return { start: this.ta.selectionStart, end: this.ta.selectionEnd, top: this.ta.scrollTop, left: this.ta.scrollLeft };
+  }
+
+  restorePosition({ start = 0, end = start, top = 0, left = 0 }) {
+    const len = this.ta.value.length;
+    this.ta.setSelectionRange(Math.min(start, len), Math.min(end, len));
+    this.ta.scrollTop = top;
+    this.ta.scrollLeft = left;
+    this.syncScroll();
+  }
+
   render() {
     // Trailing newline keeps the <pre> as tall as the textarea.
     this.hl.innerHTML = highlight(this.ta.value, this.lang) + "\n";
