@@ -88,7 +88,9 @@ export async function listProblems() {
     for (const name of names) {
       const dir = problemDir(g.type, name);
       if (!dir || !(await stat(dir)).isDirectory()) continue;
-      const { readonly: _ro, ...meta } = await readMeta(dir);
+      const full = await readMeta(dir).catch(() => null);
+      if (!full) continue; // incomplete problem folder (no/invalid meta.json)
+      const { readonly: _ro, ...meta } = full;
       problems.push({ ...meta, id: `${g.type}/${name}`, type: g.type });
     }
     problems.sort((a, b) => a.order - b.order);

@@ -1,0 +1,1 @@
+{"title": "Longest Substring Without Repeating Characters", "difficulty": "medium", "minutes": 30, "language": "go", "readonly": ["solution_test.go"], "order": 10}

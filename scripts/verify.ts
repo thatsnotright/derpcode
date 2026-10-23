@@ -10,7 +10,7 @@ let failures = 0;
 
 function report(id: string, ok: boolean, detail: string) {
   if (!ok) failures++;
-  console.log(`${ok ? "PASS" : "FAIL"}  ${id.padEnd(36)} ${detail}`);
+  console.log(`${ok ? "PASS" : "FAIL"}  ${id.padEnd(44)} ${detail}`);
 }
 
 function summarize(r: RunResult): string {
@@ -36,7 +36,7 @@ for (const group of groups) {
 
     if (type === "react") {
       if (!canBundle) {
-        console.log(`SKIP  ${summary.id.padEnd(36)} esbuild/react not installed (npm install)`);
+        console.log(`SKIP  ${summary.id.padEnd(44)} esbuild/react not installed (npm install)`);
         continue;
       }
       const [s, r] = [await bundleReact(starter), await bundleReact(reference)];
